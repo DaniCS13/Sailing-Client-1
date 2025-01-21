@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://wwww.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments/template :: head}">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+<script
+	src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+
+<link rel="stylesheet" th:href="@{/css/main.css}"
+	href="../static/css/main.css" />
+<title>Trips</title>
+</head>
+<body>
+	<!--/* TODO - Include AJAX script to load tracking */-->
+
+	<!--/* TODO - Include cancel trip dialog, if user has role CLIENT */-->
+
+	<!--/* TODO - Include done trip dialog, if user has role ADMIN  */-->
+
+	<!--/* TODO - Include reschedule trip dialog, if user has role ADMIN  */-->
+
+	<!-- /* TODO - Include tracking dialog */ -->
+
+	<section class="container">
+		<header class="jumbotron" th:replace="~{fragments/template :: header}">
+			Trips Header </header>
+
+		<nav class="navbar navbar-default"
+			th:replace="~{fragments/template :: navbar}">Navbar</nav>
+
+		<section class="card my-1"
+			th:replace="~{fragments/template :: heading('Trips')}">Trips</section>
+
+		<!-- /* List all trips (if CLIENT, his owns; if ADMIN, all */ -->
+	</section>
+</body>
+</html>
