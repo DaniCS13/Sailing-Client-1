@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://wwww.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+<script
+	src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+
+<link rel="stylesheet" th:href="@{/css/main.css}"
+	href="../../static/css/main.css" />
+
+<title>Parts</title>
+</head>
+<div class="row" th:fragment="tripTypes(tripTypes)">
+	<div th:each="tripType, iStat  : ${tripTypes}" class="col-sm-4 col-md-3 my-2">
+		<div class="card">
+			<div class="card-header">
+				<h5 th:text="${tripType.title}">2 hours trip</h5>
+			</div>
+			<div class="card-body">
+				<p th:text="${tripType.description}" class="card-text">desc</p>
+				<p 
+					th:text="${#numbers.formatDecimal(tripType.price, 1, 'COMMA', 0, 'POINT')+ '€'} + ' - ' + ${tripType.duration} + ' ' + (${tripType.duration==1} ? #{parts.trip.hour} : #{parts.trip.hours})"
+					class="card-text h5">0.00€ 1 hour</p>
+				<p th:text="${tripType.maxPlaces} + ' ' + #{parts.trip.places} "
+					class="card-text">places</p>
+				<p class="card-text h6">Departures:</p>
+				<ul class="my-0" th:each="departure, iStat  : ${tripType.departures}">
+					<li  th:text="${#dates.format(departure,'HH:mm')}">9:00</li>
+					<li th:remove="all">11:00</li>
+					<li th:remove="all">16:00</li>
+					<li th:remove="all">18:00</li>
+				</ul>
+				<p class="card-text"></p>
+				<a sec:authorize="!hasRole('ADMIN')" th:href="@{/trips/book/{trypTypeId}(trypTypeId=${tripType.id})}"
+				class="btn btn-secondary">Book</a>
+			</div>
+		</div>
+	</div>
+	<div th:remove="all" class="col-sm-4 col-md-3 my-5">
+		<div class="card">
+			<div class="card-header">
+				<h5>Search for cetaceans</h5>
+			</div>
+			<div class="card-body">
+				<p class="card-text">desc</p>
+				<p class="card-text">0.00€</p>
+				<p class="card-text">salida - llegada</p>
+				<p class="card-text">long</p>
+				<a class="btn btn-secondary">Book</a>
+			</div>
+		</div>
+	</div>
+	<div th:remove="all" class="col-sm-6 col-md-4 my-5">
+		<div class="card">
+			<div class="card-header">
+				<h5>Watch the America's CUP 2025</h5>
+			</div>
+			<div class="card-body">
+				<p class="card-text">desc</p>
+				<p class="card-text">0.00€</p>
+				<p class="card-text">salida - llegada</p>
+				<p class="card-text">long</p>
+				<a class="btn btn-secondary" >Book</a>
+			</div>
+		</div>
+	</div>
+
+</div>
+<body>
+</body>

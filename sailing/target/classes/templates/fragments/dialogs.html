@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://wwww.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+<script
+	src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+
+<link rel="stylesheet" th:href="@{/css/main.css}"
+	href="../../static/css/main.css" />
+
+<title>Dialogs</title>
+</head>
+
+<body>
+	<!-- Remove user dialog -->
+	<button type="button" class="btn btn-danger" data-bs-toggle="modal"
+		data-bs-target="#removeUserDialog" data-bs-username="username">Remove
+		user dialog</button>
+
+	<div th:fragment="remove_user_dialog">
+
+		<div id="removeUserDialog" class="modal fade">
+
+			<div class="modal-dialog">
+
+				<div class="modal-content">
+
+					<div class="modal-header" style="padding: 35px 50px;">
+						<h4 class="modal-title" th:utext="#{dialogs.user.remove.title}">Confirm
+							remove</h4>
+						<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+					</div>
+
+					<div class="modal-body" style="padding: 40px 50px;">
+						<p th:utext="#{dialogs.user.remove.body}">Confirm body</p>
+					</div>
+
+					<div class="modal-footer">
+						<button type="button" class="btn btn-light"
+							data-bs-dismiss="modal"
+							th:text="#{dialogs.user.remove.cancel.button}">Cancel</button>
+						<a class="btn btn-danger" href="#"> <i class="bi bi-x-circle">
+						</i> <span th:text="#{dialogs.user.remove.remove.button}">Remove</span>
+						</a>
+					</div>
+
+				</div>
+
+			</div>
+
+		</div>
+
+		<script th:inline="javascript">
+			var removeDialogMsg = /*[[#{dialogs.user.remove.body}]]*/ 'Are you sure you wish to delete user <strong>{0}</strong>?'
+		</script>
+
+		<script th:inline="javascript">
+			var removeDialogUrl = /*[[@{/users/remove/} + '{username}']]*/ '/users/remove/{username}'
+		</script>
+
+		<script>
+			const removeUserDialog = document.getElementById('removeUserDialog')
+			if (removeUserDialog) {
+			  removeUserDialog.addEventListener('show.bs.modal', event => {
+			    // Button that triggered the modal
+			    const button = event.relatedTarget
+			    // Extract info from data-bs-* attributes
+			    const username = button.getAttribute('data-bs-username')
+			    // If necessary, you could initiate an Ajax request here
+			    // and then do the updating in a callback.
+	
+			    // Update the modal's content.
+			    const modalBodyMessage = removeUserDialog.querySelector('.modal-body p')
+			    const modalFooterUrl = removeUserDialog.querySelector('.modal-footer a')
+	
+			    modalBodyMessage.innerHTML = removeDialogMsg.replace('{0}', username)
+			    modalFooterUrl.href = removeDialogUrl.replace('{username}', username)
+			  })
+			}
+		</script>
+
+	</div>
+
+	<!-- Cancel trip dialog -->
+	<button type="button" class="btn btn-danger" data-bs-toggle="modal"
+		data-bs-target="#cancelTripDialog" data-bs-tripId="1">Cancel
+		trip dialog</button>
+
+	<div th:fragment="cancel_trip_dialog">
+
+		<div id="cancelTripDialog" class="modal fade">
+
+			<div class="modal-dialog">
+
+				<form action="#" th:action="@{/trips/done}" method="post"
+					th:object="${cancellation}">
+
+					<div class="modal-content">
+
+						<div class="modal-header" style="padding: 35px 50px;">
+							<h4 class="modal-title" th:utext="#{dialogs.cancel.trip.title}">Trip</h4>
+							<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+						</div>
+
+						<div class="modal-body form-horizontal"
+							style="padding: 40px 50px;">
+
+							<p th:utext="#{dialogs.cancel.trip.body}">Confirm body</p>
+
+							<input type="hidden" th:field="*{type}" /> <input type="hidden"
+								th:field="*{performer}" /> <input id="tripId" type="hidden"
+								th:field="*{tripId}" /> <label
+								th:utext="#{dialogs.reschedule.trip.comments}"
+								class="form-label mt-3">Comments</label>
+							<textarea rows="3" cols="38" th:field="*{comments}"></textarea>
+
+						</div>
+
+						<div class="modal-footer">
+							<button type="button" class="btn btn-light"
+								data-bs-dismiss="modal"
+								th:text="#{dialogs.cancel.trip.cancel.button}">Cancel</button>
+							<button type="submit" class="btn btn-danger">
+								<i class="bi bi-journal-x"> </i>
+								<span th:text="#{dialogs.cancel.trip.confirm.button}">Confirm</span>
+							</button>
+						</div>
+
+					</div>
+
+				</form>
+
+			</div>
+
+		</div>
+
+		<script th:inline="javascript">
+			var cancelTripDialogMsg = /*[[#{dialogs.cancel.trip.body}]]*/ 'You are going to cancel the trip <strong>{0}</strong>'
+		</script>
+
+		<script>
+			const cancelTripDialog = document.getElementById('cancelTripDialog')
+			if (cancelTripDialog) {
+			  cancelTripDialog.addEventListener('show.bs.modal', event => {
+			    // Button that triggered the modal
+			    const button = event.relatedTarget
+			    // Extract info from data-bs-* attributes
+			    const tripId = button.getAttribute('data-bs-tripId')
+			    
+			    // If necessary, you could initiate an Ajax request here
+			    // and then do the updating in a callback.
+	
+			    // Update the modal's content.
+			    const modalBodyMessage = cancelTripDialog.querySelector('.modal-body p')
+	
+			    modalBodyMessage.innerHTML = cancelTripDialogMsg.replace('{0}', tripId)
+			    
+			    const tripIdInput = cancelTripDialog.querySelector('#tripId')
+			    
+			    tripIdInput.value = tripId
+			  })
+			}
+		</script>
+
+	</div>
+
+	<!-- Trip done dialog -->
+	<button type="button" class="btn btn-success" data-bs-toggle="modal"
+		data-bs-target="#tripDoneDialog" data-bs-tripId="1">Trip done
+		dialog</button>
+
+	<div th:fragment="trip_done_dialog">
+
+		<div id="tripDoneDialog" class="modal fade">
+
+			<div class="modal-dialog">
+
+				<form action="#" th:action="@{/trips/done}" method="post"
+					th:object="${done}">
+
+					<div class="modal-content">
+
+						<div class="modal-header" style="padding: 35px 50px;">
+							<h4 class="modal-title" th:utext="#{dialogs.done.trip.title}">Trip</h4>
+							<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+						</div>
+
+						<div class="modal-body form-horizontal"
+							style="padding: 40px 50px;">
+
+							<p th:utext="#{dialogs.done.trip.body}">Confirm body</p>
+
+							<input type="hidden" th:field="*{type}" /> <input type="hidden"
+								th:field="*{performer}" /> <input id="tripId" type="hidden"
+								th:field="*{tripId}" /> <label
+								th:utext="#{dialogs.reschedule.trip.comments}"
+								class="form-label mt-3">Comments</label>
+							<textarea rows="3" cols="38" th:field="*{comments}"></textarea>
+
+						</div>
+
+						<div class="modal-footer">
+							<button type="button" class="btn btn-light"
+								data-bs-dismiss="modal"
+								th:text="#{dialogs.done.trip.cancel.button}">Cancel</button>
+							<button type="submit" class="btn btn-success">
+								<i class="bi bi-journal-check"> </i>
+								<span th:text="#{dialogs.done.trip.confirm.button}">Confirm</span>
+							</button>
+						</div>
+
+					</div>
+
+				</form>
+
+			</div>
+
+		</div>
+
+		<script th:inline="javascript">
+			var tripDoneDialogMsg = /*[[#{dialogs.done.trip.body}]]*/ 'You are going to mark the trip <strong>{0}</strong> as done'
+		</script>
+
+		<script>
+			const tripDoneDialog = document.getElementById('tripDoneDialog')
+			if (tripDoneDialog) {
+			  tripDoneDialog.addEventListener('show.bs.modal', event => {
+			    // Button that triggered the modal
+			    const button = event.relatedTarget
+			    // Extract info from data-bs-* attributes
+			    const tripId = button.getAttribute('data-bs-tripId')
+			    
+			    // If necessary, you could initiate an Ajax request here
+			    // and then do the updating in a callback.
+	
+			    // Update the modal's content.
+			    const modalBodyMessage = tripDoneDialog.querySelector('.modal-body p')
+	
+			    modalBodyMessage.innerHTML = tripDoneDialogMsg.replace('{0}', tripId)
+			    
+			    const tripIdInput = tripDoneDialog.querySelector('#tripId')
+			    
+			    tripIdInput.value = tripId
+			  })
+			}
+		</script>
+
+	</div>
+
+
+	<!-- Reschedule trip dialog -->
+	<button type="button" class="btn btn-warning" data-bs-toggle="modal"
+		data-bs-target="#rescheduleTripDialog" data-bs-tripId="1">Reschedule
+		trip dialog</button>
+
+	<div th:fragment="reschedule_trip_dialog">
+
+		<div id="rescheduleTripDialog" class="modal fade">
+
+			<div class="modal-dialog">
+
+				<form action="#" th:action="@{/trips/reschedule}" method="post"
+					th:object="${rescheduling}">
+
+					<div class="modal-content">
+
+						<div class="modal-header" style="padding: 35px 50px;">
+							<h4 class="modal-title"
+								th:utext="#{dialogs.reschedule.trip.title}">Trip</h4>
+							<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+						</div>
+
+						<div class="modal-body form-horizontal"
+							style="padding: 40px 50px;">
+
+							<p th:utext="#{dialogs.reschedule.trip.body}">Confirm body</p>
+
+							<input type="hidden" th:field="*{type}" /> <input type="hidden"
+								th:field="*{performer}" /> <input id="tripId" type="hidden"
+								th:field="*{tripId}" /> <label
+								th:text="#{dialogs.reschedule.new.date}" for="date"
+								class="form-label mt-3">Select new date:</label> <input
+								th:field="*{newDate}" id="date" type="date" class="form-control" />
+
+							<label for="departure"
+								th:text="#{dialogs.reschedule.new.departure.time}"
+								class="form-label mt-3">Select new departure:</label> <input
+								th:field="*{newDeparture}" id="departure" type="time"
+								class="form-control"> <label
+								th:utext="#{dialogs.reschedule.trip.comments}"
+								class="form-label mt-3">Comments</label>
+
+							<textarea rows="3" cols="38" th:field="*{comments}"></textarea>
+
+						</div>
+
+						<div class="modal-footer">
+							<button type="button" class="btn btn-light"
+								data-bs-dismiss="modal"
+								th:text="#{dialogs.reschedule.trip.cancel.button}">Cancel</button>
+							<button type="submit" class="btn btn-warning">
+								<i class="bi bi-journals"> </i>
+								<span th:text="#{dialogs.reschedule.trip.confirm.button}">Confirm</span>
+							</button>
+						</div>
+
+					</div>
+
+				</form>
+
+			</div>
+
+		</div>
+
+		<script th:inline="javascript">
+			var rescheduleTripDialogMsg = /*[[#{dialogs.reschedule.trip.body}]]*/ 'You are going to mark the trip <strong>{0}</strong> as rescheduled'
+		</script>
+
+		<script>
+			const rescheduleTripDialog = document.getElementById('rescheduleTripDialog')
+			if (rescheduleTripDialog) {
+			  rescheduleTripDialog.addEventListener('show.bs.modal', event => {
+			    // Button that triggered the modal
+			    const button = event.relatedTarget
+			    // Extract info from data-bs-* attributes
+			    const tripId = button.getAttribute('data-bs-tripId')
+			    
+			    // If necessary, you could initiate an Ajax request here
+			    // and then do the updating in a callback.
+	
+			    // Update the modal's content.
+			    const modalBodyMessage = rescheduleTripDialog.querySelector('.modal-body p')
+	
+			    modalBodyMessage.innerHTML = rescheduleTripDialogMsg.replace('{0}', tripId)
+			    
+			    const tripIdInput = rescheduleTripDialog.querySelector('#tripId')
+			    
+			    tripIdInput.value = tripId
+			  })
+			}
+		</script>
+
+	</div>
+
+	<!-- Reschedule trip dialog -->
+	<a href="#" class="text-warning" data-bs-toggle="modal"
+		data-bs-target="#trackingDialog" data-bs-tripId="1">Tracking
+		dialog</a>
+
+	<div th:fragment="tracking_dialog">
+		<div id="trackingDialog" class="modal fade ">
+			<div class="modal-dialog modal-xl modal-dialog-scrollable">
+				<div class="modal-content">
+					<div class="modal-header" style="padding: 35px 50px;">
+						<h4 class="modal-title" th:utext="#{dialogs.tracking.title}">Tracking</h4>
+						<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+					</div>
+
+					<div class="modal-body form-horizontal" style="padding: 40px 50px;">
+						<div id="trackingBody"></div>
+					</div>
+
+					<div class="modal-footer">
+						<button type="button" class="btn btn-light"
+							data-bs-dismiss="modal" th:text="#{dialogs.tracking.back.button}">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div th:fragment="tracking_dialog_body">
+		<p th:utext="#{dialogs.tracking.body(${tripId})}">Tracking body</p>
+		<table
+			class="table table-striped table-bordered table-condensed
+			table-responsive">
+			<caption></caption>
+			<thead>
+				<tr>
+					<th th:text="#{tracking.dialog.table.head.id}">#</th>
+					<th th:text="#{tracking.dialog.table.head.type}">Type</th>
+					<th th:text="#{tracking.dialog.table.head.performer}">Performer</th>
+					<th th:text="#{tracking.dialog.table.head.date}">Date</th>
+					<th th:text="#{tracking.dialog.table.head.comments}">Comments</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="action, iStat  : ${tracking}">
+					<td th:text="${action.id}">1</td>
+					<td th:text="${action.type}"
+						th:class="${#strings.equals(action.type, 'BOOKING')?'text-primary':
+					#strings.equals(action.type, 'CANCELLATION')?'text-danger':
+					#strings.equals(action.type, 'DONE')?'text-success':'text-warning'}">Booking</td>
+					<td th:text="${action.performer}">maria</td>
+					<td th:with="dateTimeFormat=#{date.time.format}"
+						th:text="${#dates.format(action.date,dateTimeFormat)}">Date</td>
+					<td th:with="dateFormat=#{date.format}, timeFormat=#{time.format}">
+						<span
+							th:with="formattedNewDate=${#dates.format(action.newDate,dateFormat)}, formattedNewDeparture=${#dates.format(action.newDeparture,timeFormat)}"
+							th:utext="#{tracking.dialog.table.new.departure.date(${formattedNewDate},${formattedNewDeparture})}"
+							th:if="${#strings.equals(action.type, 'RESCHEDULING')}"
+							class="badge text-bg-warning">25/08/2024 10:00</span> <br> <span
+							th:text="${action.comments}">Comments</span>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</body>

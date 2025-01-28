@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://wwww.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:fragment="head">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+<script
+	src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<link rel="stylesheet" th:href="@{/css/main.css}"
+	href="../../static/css/main.css" />
+<title th:text="#{template.head.title}">Title</title>
+</head>
+
+<body>
+	<div class="container">
+		<header th:fragment="header" class="mt-4 p-5 bg-light rounded">
+			<h1 th:text="#{template.header.title}">Header title</h1>
+			<p th:text="#{template.header.subtitle}">Header subtitle</p>
+		</header>
+
+		<nav th:fragment="navbar"
+			class="navbar navbar-expand-lg sticky-top bg-light rounded my-1">
+			<div class="container-fluid">
+				<ul class="navbar-nav">
+
+					<li class="navbar-brand" sec:authorize="isAuthenticated()"><i
+						class="bi bi-person-fill"></i> <span sec:authentication="name">username</span>
+					</li>
+
+					<li class="nav-item dropdown" sec:authorize="isAuthenticated()">
+						<a class="nav-link dropdown-toggle" href="#"
+						data-bs-toggle="dropdown"> <i class="bi bi-list-ol"></i> <span
+							th:text="#{template.navbar.trips}">trips</span>
+					</a>
+						<ul class="dropdown-menu">
+
+							<li th:remove="all" sec:authorize="hasAnyRole('ADMIN')"><a
+								class="dropdown-item" th:href="@{/trips/new}"> <i
+									class="bi bi-plus-circle"></i> <span
+									th:text="#{template.navbar.trips.new}">new</span>
+							</a></li>
+							<li sec:authorize="hasAnyRole('CLIENT')"><a
+								class="dropdown-item" th:href="@{/}"> <i class="bi bi-plus"></i>
+									<span th:text="#{template.navbar.trips.book}">book trip</span>
+							</a></li>
+							<li><a class="dropdown-item" th:href="@{/trips/booked}">
+									<i class="bi bi-list"></i> <span
+									th:text="#{template.navbar.trips.booked}">booked</span>
+							</a></li>
+						</ul>
+					</li>
+					<li class="nav-item dropdown" sec:authorize="isAuthenticated()">
+						<a class="nav-link dropdown-toggle" href="#"
+						data-bs-toggle="dropdown"> <i class="bi bi-list-ol"></i> <span
+							th:text="#{template.navbar.users}">users</span>
+					</a>
+						<ul class="dropdown-menu">
+							<li sec:authorize="hasAnyRole('ADMIN')"><a
+								class="dropdown-item" th:href="@{/users/new/admin}"> <i
+									class="bi bi-plus-circle"></i> <span
+									th:text="#{template.navbar.users.new}">new</span>
+							</a></li>
+							<li><a class="dropdown-item" th:href="@{/users/edit}"> <i
+									class="bi bi-person-gear"></i> <span
+									th:text="#{template.navbar.users.edit}">edit</span>
+							</a></li>
+							<li sec:authorize="hasAnyRole('ADMIN')"><a
+								class="dropdown-item" th:href="@{/users/list}"> <i
+									class="bi bi-people"></i> <span
+									th:text="#{template.navbar.users.list}">list</span>
+							</a></li>
+						</ul>
+					</li>
+				</ul>
+				<ul class="navbar-nav">
+					<li class="nav-item dropdown"><a
+						class="nav-link dropdown-toggle" data-bs-toggle="dropdown"
+						role="button" href="#"> <i class="bi bi-flag"></i> <span
+							th:text="#{template.navbar.language}">language </span>
+					</a>
+						<ul class="dropdown-menu">
+							<li><a class="dropdown-item"
+								th:classappend="${#strings.contains(#locale.toString(),'es')} ? 'disabled'"
+								href="?language=es"> <i class="bi bi-globe"></i> <span
+									th:text="#{template.navbar.language.spanish}">spanish</span>
+							</a></li>
+							<li><a class="dropdown-item"
+								th:classappend="${#strings.contains(#locale.toString(),'en')} ? 'disabled'"
+								href="?language=en"> <i class="bi bi-globe"></i> <span
+									th:text="#{template.navbar.language.english}">english</span>
+							</a></li>
+						</ul></li>
+					<li class="nav-item" sec:authorize="!isAuthenticated()"><a
+						class="nav-link" th:href="@{/trips/booked}"> <i
+							class="bi bi-box-arrow-in-right"></i> <span
+							th:text="#{template.navbar.login}">login</span>
+					</a></li>
+					<li class="nav-item" sec:authorize="isAuthenticated()"><a
+						class="nav-link" th:href="@{/logout}"> <i
+							class="bi bi-box-arrow-right"></i> <span
+							th:text="#{template.navbar.logout}">logout</span>
+					</a></li>
+				</ul>
+
+			</div>
+		</nav>
+		<div class="card my-1" th:fragment="heading(title)">
+			<h5 class="card-header">
+				<span th:text="${title}">Welcome</span>
+			</h5>
+		</div>
+	</div>
+</body>

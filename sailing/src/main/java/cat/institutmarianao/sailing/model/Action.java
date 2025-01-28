@@ -46,7 +46,10 @@ public abstract class Action implements Serializable {
 	public static final String CANCELLATION = "CANCELLATION";
 	public static final String DONE = "DONE";
 
-	/*---------*/
+	public enum Type {
+		BOOKING, RESCHEDULING, CANCELLATION, DONE
+	}
+
 	/* Validation */
 	@Null(groups = { OnTripCreate.class, OnActionCreate.class }) // Must be null on inserts
 	@NotNull(groups = OnActionUpdate.class) // Must be not null on updates
