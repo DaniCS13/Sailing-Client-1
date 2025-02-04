@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.ModelAndView;
 
-import cat.institutmarianao.sailing.model.Cancellation;
+import cat.institutmarianao.sailing.model.Action;
 import cat.institutmarianao.sailing.model.Done;
 import cat.institutmarianao.sailing.model.Rescheduling;
 import cat.institutmarianao.sailing.model.Trip;
@@ -82,9 +82,9 @@ public class TripController {
 
 		// Now, prepare for departure selection, passing free places information
 		modelMap.addAttribute("tripType", tripType);
-		modelMap.addAttribute("selectedDate", trip.getDepartureDate());
-		modelMap.addAttribute("freePlaces", freePlaces.get(trip.getDepartureDate())); // Show available places for the
-																						// selected date
+		modelMap.addAttribute("selectedDate", trip.getDeparture());
+		modelMap.addAttribute("freePlaces", freePlaces.get(trip.getDeparture())); // Show available places for the
+																					// selected date
 
 		return "selectDeparture";
 	}
@@ -100,8 +100,8 @@ public class TripController {
 
 		// Prepare to select places based on available free places
 		modelMap.addAttribute("tripType", tripType);
-		modelMap.addAttribute("selectedDate", trip.getDepartureDate());
-		modelMap.addAttribute("availablePlaces", freePlaces.get(trip.getDepartureDate())); // Show available places
+		modelMap.addAttribute("selectedDate", trip.getDeparture());
+		modelMap.addAttribute("availablePlaces", freePlaces.get(trip.getDeparture())); // Show available places
 
 		return "selectPlaces";
 	}
@@ -123,47 +123,47 @@ public class TripController {
 
 	@GetMapping("/booked")
 	public ModelAndView booked() {
-		// Obtener todos los viajes reservados
-		List<Trip> bookedTrips = tripService.findAllBookedTrips(); // Implementa el método `findAllBookedTrips()` en el
-																	// servicio
+		// Obtener todos los viajes reservados (usa findAll o algún otro método
+		// adecuado)
+		List<Trip> bookedTrips = tripService.findAll(); // Puedes aplicar el filtro si es necesario
 
-		ModelAndView modelAndView = new ModelAndView("bookedTrips"); // Redirige a una vista llamada "bookedTrips"
-		modelAndView.addObject("bookedTrips", bookedTrips); // Pasamos los viajes reservados al modelo
+		ModelAndView modelAndView = new ModelAndView("bookedTrips");
+		modelAndView.addObject("bookedTrips", bookedTrips);
 
 		return modelAndView;
 	}
 
 	@PostMapping("/cancel")
-	public String cancelTrip(@Validated Cancellation cancellation) {
+	public String cancelTrip(@PathVariable Long tripId) {
 		// Add cancellation action to trip tracking
-		tripService.cancelTrip(cancellation); // Implement this in the TripService
+		tripService.cancelTrip(tripId); // Esto debe llamarse al método adecuado en el servicio
 
-		return "cancellationConfirmation"; // Redirect to a confirmation page
+		return "cancellationConfirmation"; // Redirige a una página de confirmación
 	}
 
 	@PostMapping("/done")
 	public String doneTrip(@Validated(OnActionCreate.class) Done done) {
 		// Add done action to trip tracking
-		tripService.markTripAsDone(done); // Implement this in the TripService
+		tripService.markTripAsDone(done); // Esto debe llamarse al método adecuado en el servicio
 
-		return "doneConfirmation"; // Redirect to a confirmation page
+		return "doneConfirmation"; // Redirige a una página de confirmación
 	}
 
 	@PostMapping("/reschedule")
 	public String saveAction(@Validated(OnActionCreate.class) Rescheduling rescheduling) {
 		// Add reschedule action to trip tracking
-		tripService.rescheduleTrip(rescheduling); // Implement this in the TripService
+		tripService.rescheduleTrip(rescheduling); // Esto debe llamarse al método adecuado en el servicio
 
-		return "rescheduleConfirmation"; // Redirect to a confirmation page
+		return "rescheduleConfirmation"; // Redirige a una página de confirmación
 	}
 
 	@GetMapping("/tracking/{id}")
 	public String showContentPart(@PathVariable(name = "id", required = true) @Positive Long id, ModelMap modelMap) {
 		// Retrieve the tracking actions for the given trip ID
-		List<Action> actions = tripService.getTrackingByTripId(id); // Implement in TripService
+		List<Action> actions = tripService.findTrackingById(id); // Este método ya está implementado en el servicio
 
 		modelMap.addAttribute("actions", actions);
 
-		return "tracking"; // Redirect to a page where actions are displayed
+		return "tracking"; // Redirige a una página donde se muestran las acciones
 	}
 }

@@ -13,6 +13,8 @@ import org.springframework.web.client.RestTemplate;
 
 import cat.institutmarianao.sailing.model.Action;
 import cat.institutmarianao.sailing.model.BookedPlace;
+import cat.institutmarianao.sailing.model.Done;
+import cat.institutmarianao.sailing.model.Rescheduling;
 import cat.institutmarianao.sailing.model.Trip;
 import cat.institutmarianao.sailing.model.TripType;
 import cat.institutmarianao.sailing.services.TripService;
@@ -109,20 +111,46 @@ public class TripServiceImpl implements TripService {
 
 	@Override
 	public Trip save(Trip trip) {
-		// TODO Auto-generated method stub
-		return null;
+		final String uri = webServiceHost + ":" + webServicePort + TRIPS_SERVICE + "/save";
+		return restTemplate.postForObject(uri, trip, Trip.class);
 	}
 
 	@Override
 	public List<Action> findTrackingById(Long id) {
-		// TODO Auto-generated method stub
-		return null;
+		final String uri = webServiceHost + ":" + webServicePort + "/tracking/" + id;
+		ResponseEntity<Action[]> response = restTemplate.getForEntity(uri, Action[].class);
+		return Arrays.asList(response.getBody());
 	}
 
 	@Override
 	public Action track(Action action) {
-		// TODO Auto-generated method stub
-		return null;
+		final String uri = webServiceHost + ":" + webServicePort + "/tracking";
+		return restTemplate.postForObject(uri, action, Action.class);
+	}
+
+	@Override
+	public void cancelTrip(Long tripId) {
+		final String uri = webServiceHost + ":" + webServicePort + TRIPS_SERVICE + "/cancel/" + tripId;
+		restTemplate.postForObject(uri, null, Void.class);
+	}
+
+	@Override
+	public void markTripAsDone(Done done) {
+		final String uri = webServiceHost + ":" + webServicePort + TRIPS_SERVICE + "/done";
+		restTemplate.postForObject(uri, null, Void.class);
+	}
+
+	@Override
+	public void rescheduleTrip(Rescheduling rescheduling) {
+		final String uri = webServiceHost + ":" + webServicePort + TRIPS_SERVICE + "/reschedule";
+		restTemplate.postForObject(uri, rescheduling, Void.class);
+	}
+
+	@Override
+	public List<Date> findAvailableDatesForTripType(Long tripTypeId) {
+		final String uri = webServiceHost + ":" + webServicePort + "/trips/available-dates/" + tripTypeId;
+		ResponseEntity<Date[]> response = restTemplate.getForEntity(uri, Date[].class);
+		return Arrays.asList(response.getBody());
 	}
 
 }

@@ -5,6 +5,8 @@ import java.util.List;
 
 import cat.institutmarianao.sailing.model.Action;
 import cat.institutmarianao.sailing.model.BookedPlace;
+import cat.institutmarianao.sailing.model.Done;
+import cat.institutmarianao.sailing.model.Rescheduling;
 import cat.institutmarianao.sailing.model.Trip;
 import cat.institutmarianao.sailing.model.TripType;
 import jakarta.validation.constraints.NotNull;
@@ -30,4 +32,11 @@ public interface TripService {
 
 	Action track(Action action);
 
+	void cancelTrip(Long tripId); // Método para cancelar un viaje
+
+	void markTripAsDone(Done done); // Método para marcar un viaje como realizado
+
+	void rescheduleTrip(Rescheduling rescheduling); // Método para reprogramar un viaje
+
+	List<Date> findAvailableDatesForTripType(Long tripTypeId);
 }
