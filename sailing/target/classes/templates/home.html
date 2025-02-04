@@ -29,12 +29,20 @@
 	</section>
 
 	<section class="container">
-		<!-- /* TODO - Include heading for 'Group Trips' */ -->
-		<!-- /* TODO - Include tripTypes for ${groupTrips}*/ -->
+		<!-- Heading for Group Trips -->
+		<h2>Group Trips</h2>
+		<!-- Display the list of group trip types -->
+		<ul>
+			<li th:each="tripType : ${groupTrips}" th:text="${tripType.name}">Group Trip Type</li>
+		</ul>
 	</section>
 	<section class="container">
-		<!-- /* TODO - Include heading for 'Private Trips' */ -->
-		<!-- /* TODO - Include tripTypes for ${privateTrips}*/ -->
+		<!-- Heading for Private Trips -->
+		<h2>Private Trips</h2>
+		<!-- Display the list of private trip types -->
+		<ul>
+			<li th:each="tripType : ${privateTrips}" th:text="${tripType.name}">Private Trip Type</li>
+		</ul>
 	</section>
 </body>
 </html>
