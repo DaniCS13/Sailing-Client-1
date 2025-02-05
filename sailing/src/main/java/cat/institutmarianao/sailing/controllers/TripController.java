@@ -1,10 +1,16 @@
 package cat.institutmarianao.sailing.controllers;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
@@ -20,6 +26,7 @@ import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.ModelAndView;
 
 import cat.institutmarianao.sailing.model.Action;
+import cat.institutmarianao.sailing.model.Cancellation;
 import cat.institutmarianao.sailing.model.Done;
 import cat.institutmarianao.sailing.model.Rescheduling;
 import cat.institutmarianao.sailing.model.Trip;
@@ -29,6 +36,7 @@ import cat.institutmarianao.sailing.validation.groups.OnActionCreate;
 import cat.institutmarianao.sailing.validation.groups.OnTripCreate;
 import cat.institutmarianao.sailing.validation.groups.OnTripCreateDate;
 import cat.institutmarianao.sailing.validation.groups.OnTripCreateDeparture;
+import jakarta.servlet.ServletException;
 import jakarta.validation.constraints.Positive;
 
 @Controller
@@ -60,33 +68,23 @@ public class TripController {
 
 	@GetMapping("/book/{trip_type_id}")
 	public ModelAndView bookSelectDate(@PathVariable(name = "trip_type_id", required = true) Long tripTypeId) {
-		// Get trip types and the corresponding available dates
-		TripType tripType = tripService.getTripTypeById(tripTypeId);
-		List<Date> availableDates = tripService.findAvailableDatesForTripType(tripTypeId); // Implement in TripService
+		ModelAndView trips = new ModelAndView("book_places");
+		TripType trip = tripService.getTripTypeById(tripTypeId);
+		
+		trips.addObject("trip",trip);
 
-		// Store in session attributes
-		ModelAndView modelAndView = new ModelAndView("selectDate");
-		modelAndView.addObject("tripType", tripType);
-		modelAndView.addObject("availableDates", availableDates);
-
-		return modelAndView;
+		return trips;
 	}
 
 	@PostMapping("/book/book_departure")
 	public String bookSelectDeparture(@Validated(OnTripCreateDate.class) @ModelAttribute("trip") Trip trip,
 			BindingResult result, @SessionAttribute("tripType") TripType tripType,
 			@SessionAttribute("freePlaces") Map<Date, Long> freePlaces, ModelMap modelMap) {
-		if (result.hasErrors()) {
-			return "selectDate"; // Return to date selection if validation fails
-		}
 
-		// Now, prepare for departure selection, passing free places information
-		modelMap.addAttribute("tripType", tripType);
-		modelMap.addAttribute("selectedDate", trip.getDeparture());
-		modelMap.addAttribute("freePlaces", freePlaces.get(trip.getDeparture())); // Show available places for the
-																					// selected date
-
-		return "selectDeparture";
+		// TODO - Prepare a dialog to select a departure time for the booked trip
+		// TODO - Leave all free places for the selected trip in the selected departure
+		// date in session (freePlaces attribute)
+		return null;
 	}
 
 	@PostMapping("/book/book_places")
@@ -94,76 +92,90 @@ public class TripController {
 			BindingResult result, @SessionAttribute("tripType") TripType tripType,
 			@SessionAttribute("freePlaces") Map<Date, Long> freePlaces,
 			@SessionAttribute("tripFreePlaces") Long tripFreePlaces, ModelMap modelMap) {
-		if (result.hasErrors()) {
-			return "selectDeparture"; // Return to departure selection if validation fails
-		}
 
-		// Prepare to select places based on available free places
-		modelMap.addAttribute("tripType", tripType);
-		modelMap.addAttribute("selectedDate", trip.getDeparture());
-		modelMap.addAttribute("availablePlaces", freePlaces.get(trip.getDeparture())); // Show available places
-
-		return "selectPlaces";
+		// TODO - Prepare a dialog to select places for the booked trip
+		return null;
 	}
 
 	@PostMapping("/book/book_save")
 	public String bookSave(@Validated(OnTripCreate.class) @ModelAttribute("trip") Trip trip, BindingResult result,
 			@SessionAttribute("tripType") TripType tripType, @SessionAttribute("freePlaces") Map<Date, Long> freePlaces,
 			@SessionAttribute("tripFreePlaces") Long tripFreePlaces, ModelMap modelMap, SessionStatus sessionStatus) {
-		if (result.hasErrors()) {
-			return "selectPlaces"; // Return to place selection if validation fails
-		}
 
-		// Save the trip and complete the booking
-		tripService.save(trip); // Implement the save logic in the TripService
-		sessionStatus.setComplete(); // Clear session data after booking is done
-
-		return "bookingConfirmation"; // Redirect to a confirmation page
+		// TODO - Saves a booking
+		return null;
 	}
 
 	@GetMapping("/booked")
-	public ModelAndView booked() {
-		// Obtener todos los viajes reservados (usa findAll o algún otro método
-		// adecuado)
-		List<Trip> bookedTrips = tripService.findAll(); // Puedes aplicar el filtro si es necesario
-
-		ModelAndView modelAndView = new ModelAndView("bookedTrips");
-		modelAndView.addObject("bookedTrips", bookedTrips);
-
-		return modelAndView;
+	public ModelAndView booked() throws ServletException, IOException {
+		ModelAndView trips = new ModelAndView ("trips");
+		
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String username = authentication != null ? authentication.getName() : null;
+				
+		String role = authentication != null && authentication.getAuthorities() != null
+				? authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).findFirst().orElse("")
+						: "";
+		System.out.println(role);
+		
+		List<Trip> tripList;
+		
+		if ("ROLE_ADMIN".equals(role)) {
+			tripList = tripService.findAll();
+		} else if ("ROLE_CLIENT".equals(role)){
+			tripList = tripService.findAllByClientUsername(username);
+		} else {
+			tripList = new ArrayList<>();
+		}
+		
+		List<TripType> allTripTypes = tripService.getAllTripTypes();
+		
+		Map<Long, Object> tripTypeMap = allTripTypes.stream()		
+				.collect(Collectors.toMap(TripType::getId, tripType -> tripType));
+		
+		trips.addObject("trips", tripList);
+		
+		trips.addObject("tripTypeMap", tripTypeMap);
+		
+		trips.addObject("done", new Done());
+		trips.addObject("rescheduling", new Rescheduling());
+		trips.addObject("cancellation", new Cancellation());
+		
+		return trips;
 	}
 
 	@PostMapping("/cancel")
-	public String cancelTrip(@PathVariable Long tripId) {
-		// Add cancellation action to trip tracking
-		tripService.cancelTrip(tripId); // Esto debe llamarse al método adecuado en el servicio
+	public String cancelTrip(@Validated Cancellation cancellation) {
 
-		return "cancellationConfirmation"; // Redirige a una página de confirmación
+		// TODO - Cancel a trip (add a CANCELLATION action to its tracking)
+		return null;
 	}
 
 	@PostMapping("/done")
 	public String doneTrip(@Validated(OnActionCreate.class) Done done) {
-		// Add done action to trip tracking
-		tripService.markTripAsDone(done); // Esto debe llamarse al método adecuado en el servicio
-
-		return "doneConfirmation"; // Redirige a una página de confirmación
+		System.out.println(done.toString());
+		Action action = tripService.track(done);
+		return "redirect:/trips/booked";
 	}
 
 	@PostMapping("/reschedule")
 	public String saveAction(@Validated(OnActionCreate.class) Rescheduling rescheduling) {
-		// Add reschedule action to trip tracking
-		tripService.rescheduleTrip(rescheduling); // Esto debe llamarse al método adecuado en el servicio
 
-		return "rescheduleConfirmation"; // Redirige a una página de confirmación
+		// TODO - Reschedule a trip (add a RESCHEDULE action to its tracking)
+		return null;
 	}
 
 	@GetMapping("/tracking/{id}")
 	public String showContentPart(@PathVariable(name = "id", required = true) @Positive Long id, ModelMap modelMap) {
-		// Retrieve the tracking actions for the given trip ID
-		List<Action> actions = tripService.findTrackingById(id); // Este método ya está implementado en el servicio
-
-		modelMap.addAttribute("actions", actions);
-
-		return "tracking"; // Redirige a una página donde se muestran las acciones
+		modelMap.addAttribute("tripId", id);
+		modelMap.addAttribute("tracking", tripService.findTrackingById(id));
+		return "fragments/dialogs :: tracking_dialog_body";
 	}
+	
+	private void prepareBookDate(ModelMap modelMap, Trip trip) {
+		modelMap.addAttribute("trip", trip);
+		modelMap.addAttribute("tripType", tripService.getTripTypeById(trip.getTypeId()));
+		modelMap.addAttribute("action", "/trips/book/book_departure");
+	}
+	
 }
