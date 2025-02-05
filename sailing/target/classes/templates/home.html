@@ -25,16 +25,81 @@
 
 		<nav class="navbar navbar-default"
 			th:replace="~{fragments/template :: navbar}">Navbar</nav>
-
 	</section>
 
-	<section class="container">
-		<!-- /* TODO - Include heading for 'Group Trips' */ -->
-		<!-- /* TODO - Include tripTypes for ${groupTrips}*/ -->
-	</section>
-	<section class="container">
-		<!-- /* TODO - Include heading for 'Private Trips' */ -->
-		<!-- /* TODO - Include tripTypes for ${privateTrips}*/ -->
-	</section>
+	<div class="container mt-4">
+		<h2 class="text-center">Llistat de Viatges</h2>
+
+		<!-- Viatges en grup -->
+		<h3 class="mt-4">Viatges en Grup</h3>
+		<div class="row">
+			<div th:each="tripType : ${groupTrips}"
+				class="col-sm-4 col-md-3 my-2">
+				<div class="card">
+					<div class="card-header">
+						<h5 th:text="${tripType.title}">Títol del Viatge</h5>
+					</div>
+					<div class="card-body">
+						<p th:text="${tripType.description}" class="card-text">Descripció</p>
+						<p class="card-text h5">
+							<span
+								th:text="${#numbers.formatDecimal(tripType.price, 1, 'COMMA', 0, 'POINT')}"></span>€
+							- <span th:text="${tripType.duration}"></span> <span
+								th:text="${tripType.duration == 1} ? 'hora' : 'hores'"></span>
+						</p>
+						<p class="card-text">
+							<strong>Places:</strong> <span th:text="${tripType.maxPlaces}"></span>
+						</p>
+						<p class="card-text">
+							<strong>Sortides:</strong>
+						</p>
+						<ul class="my-0">
+							<li th:each="departure : ${tripType.departures}"
+								th:text="${#dates.format(departure,'HH:mm')}">9:00</li>
+						</ul>
+						<a sec:authorize="!hasRole('ADMIN')"
+							th:href="@{/trips/book/{tripTypeId}(tripTypeId=${tripType.id})}"
+							class="btn btn-secondary">Reserva</a>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Viatges privats -->
+		<h3 class="mt-4">Viatges Privats</h3>
+		<div class="row">
+			<div th:each="tripType : ${privateTrips}"
+				class="col-sm-4 col-md-3 my-2">
+				<div class="card">
+					<div class="card-header">
+						<h5 th:text="${tripType.title}">Títol del Viatge</h5>
+					</div>
+					<div class="card-body">
+						<p th:text="${tripType.description}" class="card-text">Descripció</p>
+						<p class="card-text h5">
+							<span
+								th:text="${#numbers.formatDecimal(tripType.price, 1, 'COMMA', 0, 'POINT')}"></span>€
+							- <span th:text="${tripType.duration}"></span> <span
+								th:text="${tripType.duration == 1} ? 'hora' : 'hores'"></span>
+						</p>
+						<p class="card-text">
+							<strong>Places:</strong> <span th:text="${tripType.maxPlaces}"></span>
+						</p>
+						<p class="card-text">
+							<strong>Sortides:</strong>
+						</p>
+						<ul class="my-0">
+							<li th:each="departure : ${tripType.departures}"
+								th:text="${#dates.format(departure,'HH:mm')}">9:00</li>
+						</ul>
+						<a sec:authorize="!hasRole('ADMIN')"
+							th:href="@{/trips/book/{tripTypeId}(tripTypeId=${tripType.id})}"
+							class="btn btn-secondary">Reserva</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </body>
+
 </html>
