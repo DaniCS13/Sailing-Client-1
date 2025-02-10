@@ -1,5 +1,6 @@
 package cat.institutmarianao.sailing.services.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -7,8 +8,10 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import cat.institutmarianao.sailing.model.Action;
@@ -52,8 +55,26 @@ public class TripServiceImpl implements TripService {
 	@Override
 	public List<Trip> findAllByClientUsername(String username) {
 		final String uri = webServiceHost + ":" + webServicePort + TRIPS_FIND_BY_USERNAME + username;
-		ResponseEntity<Trip[]> response = restTemplate.getForEntity(uri, Trip[].class);
-		return Arrays.asList(response.getBody());
+		System.out.println("URL: " + uri);
+		try {
+			ResponseEntity<Trip[]> response = restTemplate.getForEntity(uri, Trip[].class);
+			if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+				return Arrays.asList(response.getBody());
+			} else {
+				// Log the error or handle it accordingly
+				System.err.println(
+						"Error fetching trips for username: " + username + ", Status: " + response.getStatusCode());
+				return new ArrayList<>(); // Return an empty list or handle as needed
+			}
+		} catch (HttpClientErrorException e) {
+			// Handle specific HTTP errors
+			System.err.println("HTTP error: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
+			return new ArrayList<>();
+		} catch (Exception e) {
+			// Handle other exceptions
+			e.printStackTrace();
+			return new ArrayList<>();
+		}
 	}
 
 	/*

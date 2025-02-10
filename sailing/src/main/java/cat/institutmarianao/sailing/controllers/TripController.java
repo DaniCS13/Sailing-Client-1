@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -44,6 +45,7 @@ import jakarta.validation.constraints.Positive;
 @RequestMapping(value = "/trips")
 public class TripController {
 
+	@Autowired
 	private TripService tripService;
 
 	@ModelAttribute("trip")
@@ -70,8 +72,8 @@ public class TripController {
 	public ModelAndView bookSelectDate(@PathVariable(name = "trip_type_id", required = true) Long tripTypeId) {
 		ModelAndView trips = new ModelAndView("book_places");
 		TripType trip = tripService.getTripTypeById(tripTypeId);
-		
-		trips.addObject("trip",trip);
+
+		trips.addObject("trip", trip);
 
 		return trips;
 	}
@@ -108,39 +110,39 @@ public class TripController {
 
 	@GetMapping("/booked")
 	public ModelAndView booked() throws ServletException, IOException {
-		ModelAndView trips = new ModelAndView ("trips");
-		
+		ModelAndView trips = new ModelAndView("trips");
+
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		String username = authentication != null ? authentication.getName() : null;
-				
+
 		String role = authentication != null && authentication.getAuthorities() != null
 				? authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).findFirst().orElse("")
-						: "";
+				: "";
 		System.out.println(role);
-		
+
 		List<Trip> tripList;
-		
+
 		if ("ROLE_ADMIN".equals(role)) {
 			tripList = tripService.findAll();
-		} else if ("ROLE_CLIENT".equals(role)){
+		} else if ("ROLE_CLIENT".equals(role)) {
 			tripList = tripService.findAllByClientUsername(username);
 		} else {
 			tripList = new ArrayList<>();
 		}
-		
+
 		List<TripType> allTripTypes = tripService.getAllTripTypes();
-		
-		Map<Long, Object> tripTypeMap = allTripTypes.stream()		
+
+		Map<Long, Object> tripTypeMap = allTripTypes.stream()
 				.collect(Collectors.toMap(TripType::getId, tripType -> tripType));
-		
+
 		trips.addObject("trips", tripList);
-		
+
 		trips.addObject("tripTypeMap", tripTypeMap);
-		
+
 		trips.addObject("done", new Done());
 		trips.addObject("rescheduling", new Rescheduling());
 		trips.addObject("cancellation", new Cancellation());
-		
+
 		return trips;
 	}
 
@@ -171,11 +173,11 @@ public class TripController {
 		modelMap.addAttribute("tracking", tripService.findTrackingById(id));
 		return "fragments/dialogs :: tracking_dialog_body";
 	}
-	
+
 	private void prepareBookDate(ModelMap modelMap, Trip trip) {
 		modelMap.addAttribute("trip", trip);
 		modelMap.addAttribute("tripType", tripService.getTripTypeById(trip.getTypeId()));
 		modelMap.addAttribute("action", "/trips/book/book_departure");
 	}
-	
+
 }
