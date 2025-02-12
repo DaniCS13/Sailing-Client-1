@@ -34,13 +34,13 @@
 
 	<!--/* TODO - Include cancel trip dialog, if user has role CLIENT */-->
 	<div sec:authorize="hasRole('CLIENT')"
-        th:replace="~{fragments/dialogs.html :: cancel_trip_dialog}"></div>
+		th:replace="~{fragments/dialogs.html :: cancel_trip_dialog}"></div>
 	<!--/* TODO - Include done trip dialog, if user has role ADMIN  */-->
 	<div sec:authorize="hasRole('ADMIN')"
-        th:replace="~{fragments/dialogs.html :: trip_done_dialog}"></div>
+		th:replace="~{fragments/dialogs.html :: trip_done_dialog}"></div>
 	<!--/* TODO - Include reschedule trip dialog, if user has role ADMIN  */-->
 	<div sec:authorize="hasRole('ADMIN')"
-        th:replace="~{fragments/dialogs.html :: reschedule_trip_dialog}"></div>
+		th:replace="~{fragments/dialogs.html :: reschedule_trip_dialog}"></div>
 	<!-- /* TODO - Include tracking dialog */ -->
 	<div th:replace="~{fragments/dialogs.html :: tracking_dialog}"></div>
 
@@ -55,7 +55,54 @@
 			th:replace="~{fragments/template :: heading('Trips')}">Trips</section>
 
 		<!-- /* List all trips (if CLIENT, his owns; if ADMIN, all */ -->
-		
+		<table
+			class="table table-striped table-bordered table-condensed table-responsive">
+			<thead>
+				<tr>
+					<th>#</th>
+					<th>Type ID</th>
+					<th>Client Username</th>
+					<th>Places</th>
+					<th>Status</th>
+					<th>Date</th>
+					<th>Departure</th>
+					<th>Delete</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="trip, iStat : ${trips}">
+					<td th:text="${trip.id}">123</td>
+					<td th:text="${trip.typeId}">1</td>
+					<td th:text="${trip.clientUsername}">john_doe</td>
+					<td th:text="${trip.places}">5</td>
+					<td th:text="${trip.status}">RESERVED</td>
+					<td th:text="${#dates.format(trip.date, 'yyyy-MM-dd')}">2025-02-12</td>
+					<td th:text="${#dates.format(trip.departure, 'HH:mm:ss')}">12:00:00</td>
+					<td class="text-center">
+						<button th:data-bs-tripid="${trip.id}" type="button"
+							class="btn btn-danger btn-sm" data-bs-toggle="modal"
+							data-bs-target="#removeTripDialog">
+							<i class="bi bi-x-circle"></i>
+						</button>
+					</td>
+				</tr>
+				<tr th:remove="all">
+					<td>2</td>
+					<td>124</td>
+					<td>2</td>
+					<td>jane_doe</td>
+					<td>3</td>
+					<td>RESCHEDULED</td>
+					<td>2025-02-13</td>
+					<td>14:00:00</td>
+					<td class="text-center">
+						<button type="button" class="btn btn-danger btn-sm">
+							<i class="bi bi-x-circle"></i>
+						</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
 
 	</section>
 </body>
