@@ -60,24 +60,30 @@
 			<thead>
 				<tr>
 					<th>#</th>
-					<th>Type ID</th>
-					<th>Client Username</th>
-					<th>Places</th>
-					<th>Status</th>
 					<th>Date</th>
 					<th>Departure</th>
-					<th>Delete</th>
+					<th>Places</th>
+					<th th:if="${role == 'ROLE_ADMIN'}">Username</th>
+					<th>Type</th>
+					<th>Category</th>
+					<th>Status</th>
+					<th>Actions</th>
 				</tr>
 			</thead>
 			<tbody>
 				<tr th:each="trip, iStat : ${trips}">
 					<td th:text="${trip.id}">123</td>
-					<td th:text="${trip.typeId}">1</td>
-					<td th:text="${trip.clientUsername}">john_doe</td>
-					<td th:text="${trip.places}">5</td>
-					<td th:text="${trip.status}">RESERVED</td>
 					<td th:text="${#dates.format(trip.date, 'yyyy-MM-dd')}">2025-02-12</td>
 					<td th:text="${#dates.format(trip.departure, 'HH:mm:ss')}">12:00:00</td>
+					<td th:text="${trip.places}">5</td>
+					
+					<!-- falta hacer que funcione el condicional de role -->
+					<td th:if="${role == 'ADMIN'}" th:text="${trip.clientUsername}"></td>
+					
+					<td th:text="${tripTypeMap[trip.typeId]?.title}"></td>
+					<td th:text="${tripTypeMap[trip.typeId]?.category}"></td>
+					<td th:text="${trip.status}">RESERVED</td>					
+					
 					<td class="text-center">
 						<button th:data-bs-tripid="${trip.id}" type="button"
 							class="btn btn-danger btn-sm" data-bs-toggle="modal"
