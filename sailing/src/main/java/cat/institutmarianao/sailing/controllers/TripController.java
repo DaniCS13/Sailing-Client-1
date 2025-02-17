@@ -143,6 +143,8 @@ public class TripController {
 		trips.addObject("rescheduling", new Rescheduling());
 		trips.addObject("cancellation", new Cancellation());
 
+		trips.addObject("role", role);
+
 		return trips;
 	}
 

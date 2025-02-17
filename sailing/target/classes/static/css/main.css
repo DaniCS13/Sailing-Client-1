@@ -1,0 +1,14 @@
+.text-reserved {
+    color: blue;
+    text-decoration: underline;
+}
+
+.text-cancelled {
+    color: red;
+    text-decoration: underline;
+}
+
+.text-rescheduled {
+    color: yellow;
+    text-decoration: underline;
+}

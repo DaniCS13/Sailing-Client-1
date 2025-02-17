@@ -76,20 +76,41 @@
 					<td th:text="${#dates.format(trip.date, 'yyyy-MM-dd')}">2025-02-12</td>
 					<td th:text="${#dates.format(trip.departure, 'HH:mm:ss')}">12:00:00</td>
 					<td th:text="${trip.places}">5</td>
-					
-					<!-- falta hacer que funcione el condicional de role -->
-					<td th:if="${role == 'ADMIN'}" th:text="${trip.clientUsername}"></td>
-					
+
+					<td th:if="${role == 'ROLE_ADMIN'}"
+						th:text="${trip.clientUsername}"></td>
+
 					<td th:text="${tripTypeMap[trip.typeId]?.title}"></td>
 					<td th:text="${tripTypeMap[trip.typeId]?.category}"></td>
-					<td th:text="${trip.status}">RESERVED</td>					
-					
+
+					<td th:text="${trip.status}"
+						th:class="${trip.status == 'RESERVED' ? 'text-reserved' :
+               trip.status == 'CANCELLED' ? 'text-cancelled' :
+               trip.status == 'RESCHEDULED' ? 'text-rescheduled' : ''}">
+					</td>
+
 					<td class="text-center">
-						<button th:data-bs-tripid="${trip.id}" type="button"
+						<button
+							th:if="${#strings.trim(trip.status) != 'CANCELLED' and role != 'ROLE_ADMIN'}"
+							th:data-bs-tripid="${trip.id}" type="button"
 							class="btn btn-danger btn-sm" data-bs-toggle="modal"
 							data-bs-target="#removeTripDialog">
 							<i class="bi bi-x-circle"></i>
 						</button>
+						<div th:if="${role == 'ROLE_ADMIN'}">
+							<button th:if="${#strings.trim(trip.status) != 'CANCELLED'}"
+								th:data-bs-tripid="${trip.id}" type="button"
+								class="btn btn-warning btn-sm" data-bs-toggle="modal"
+								data-bs-target="#rescheduleTripDialog">
+								<i class="bi bi-arrow-clockwise"></i>
+							</button>
+							<button th:if="${#strings.trim(trip.status) != 'CANCELLED'}"
+								th:data-bs-tripid="${trip.id}" type="button"
+								class="btn btn-success btn-sm" data-bs-toggle="modal"
+								data-bs-target="#doneTripDialog">
+								<i class="bi bi-check-circle"></i>
+							</button>
+						</div>
 					</td>
 				</tr>
 				<tr th:remove="all">
