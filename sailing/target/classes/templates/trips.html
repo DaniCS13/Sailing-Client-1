@@ -20,14 +20,29 @@
 </head>
 <body>
 	<!--/* TODO - Include AJAX script to load tracking */-->
+	<script th:inline="javascript">
+		function loadTracking(tripId) {
+			$.ajax({
+				url: '/trips/tracking/' + tripId,
+				success: function(data) {
+					$('#trackingBody').html(data);
+					$('#trackingDialog').modal('show');
+				}
+			});
+		}
+	</script>
 
 	<!--/* TODO - Include cancel trip dialog, if user has role CLIENT */-->
-
+	<div sec:authorize="hasRole('CLIENT')"
+		th:replace="~{fragments/dialogs.html :: cancel_trip_dialog}"></div>
 	<!--/* TODO - Include done trip dialog, if user has role ADMIN  */-->
-
+	<div sec:authorize="hasRole('ADMIN')"
+		th:replace="~{fragments/dialogs.html :: trip_done_dialog}"></div>
 	<!--/* TODO - Include reschedule trip dialog, if user has role ADMIN  */-->
-
+	<div sec:authorize="hasRole('ADMIN')"
+		th:replace="~{fragments/dialogs.html :: reschedule_trip_dialog}"></div>
 	<!-- /* TODO - Include tracking dialog */ -->
+	<div th:replace="~{fragments/dialogs.html :: tracking_dialog}"></div>
 
 	<section class="container">
 		<header class="jumbotron" th:replace="~{fragments/template :: header}">
@@ -40,6 +55,82 @@
 			th:replace="~{fragments/template :: heading('Trips')}">Trips</section>
 
 		<!-- /* List all trips (if CLIENT, his owns; if ADMIN, all */ -->
+		<table
+			class="table table-striped table-bordered table-condensed table-responsive">
+			<thead>
+				<tr>
+					<th>#</th>
+					<th>Date</th>
+					<th>Departure</th>
+					<th>Places</th>
+					<th th:if="${role == 'ROLE_ADMIN'}">Username</th>
+					<th>Type</th>
+					<th>Category</th>
+					<th>Status</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="trip, iStat : ${trips}">
+					<td th:text="${trip.id}">123</td>
+					<td th:text="${#dates.format(trip.date, 'yyyy-MM-dd')}">2025-02-12</td>
+					<td th:text="${#dates.format(trip.departure, 'HH:mm:ss')}">12:00:00</td>
+					<td th:text="${trip.places}">5</td>
+
+					<td th:if="${role == 'ROLE_ADMIN'}"
+						th:text="${trip.clientUsername}"></td>
+
+					<td th:text="${tripTypeMap[trip.typeId]}"></td>
+					<td th:text="${tripTypeCategories[trip.typeId]}"></td>
+
+					<td th:text="${trip.status}"
+						th:class="${trip.status == 'RESERVED' ? 'text-reserved' :
+               trip.status == 'CANCELLED' ? 'text-cancelled' :
+               trip.status == 'RESCHEDULED' ? 'text-rescheduled' : ''}">
+					</td>
+
+					<td class="text-center">
+						<button
+							th:if="${#strings.trim(trip.status) != 'CANCELLED' and role != 'ROLE_ADMIN'}"
+							th:data-bs-tripid="${trip.id}" type="button"
+							class="btn btn-danger btn-sm" data-bs-toggle="modal"
+							data-bs-target="#cancelTripDialog">
+							<i class="bi bi-x-circle"></i>
+						</button>
+						<div th:if="${role == 'ROLE_ADMIN'}">
+							<button th:if="${#strings.trim(trip.status) != 'CANCELLED'}"
+								th:data-bs-tripid="${trip.id}" type="button"
+								class="btn btn-warning btn-sm" data-bs-toggle="modal"
+								data-bs-target="#rescheduleTripDialog">
+								<i class="bi bi-arrow-clockwise"></i>
+							</button>
+							<button th:if="${#strings.trim(trip.status) != 'CANCELLED'}"
+								th:data-bs-tripid="${trip.id}" type="button"
+								class="btn btn-success btn-sm" data-bs-toggle="modal"
+								data-bs-target="#doneTripDialog">
+								<i class="bi bi-check-circle"></i>
+							</button>
+						</div>
+					</td>
+				</tr>
+				<tr th:remove="all">
+					<td>2</td>
+					<td>124</td>
+					<td>2</td>
+					<td>jane_doe</td>
+					<td>3</td>
+					<td>RESCHEDULED</td>
+					<td>2025-02-13</td>
+					<td>14:00:00</td>
+					<td class="text-center">
+						<button type="button" class="btn btn-danger btn-sm">
+							<i class="bi bi-x-circle"></i>
+						</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+
 	</section>
 </body>
 </html>

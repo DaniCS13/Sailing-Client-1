@@ -3,8 +3,15 @@ package cat.institutmarianao.sailing.services;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PostMapping;
+
 import cat.institutmarianao.sailing.model.Action;
 import cat.institutmarianao.sailing.model.BookedPlace;
+import cat.institutmarianao.sailing.model.Cancellation;
+import cat.institutmarianao.sailing.model.Done;
+import cat.institutmarianao.sailing.model.Rescheduling;
 import cat.institutmarianao.sailing.model.Trip;
 import cat.institutmarianao.sailing.model.TripType;
 import jakarta.validation.constraints.NotNull;
@@ -30,4 +37,7 @@ public interface TripService {
 
 	Action track(Action action);
 
+	List<Date> findAvailableDatesForTripType(Long tripTypeId);
 }
+
+

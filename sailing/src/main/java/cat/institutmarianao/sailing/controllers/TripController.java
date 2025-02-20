@@ -1,9 +1,17 @@
 package cat.institutmarianao.sailing.controllers;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
@@ -18,6 +26,7 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.ModelAndView;
 
+import cat.institutmarianao.sailing.model.Action;
 import cat.institutmarianao.sailing.model.Cancellation;
 import cat.institutmarianao.sailing.model.Done;
 import cat.institutmarianao.sailing.model.Rescheduling;
@@ -28,6 +37,7 @@ import cat.institutmarianao.sailing.validation.groups.OnActionCreate;
 import cat.institutmarianao.sailing.validation.groups.OnTripCreate;
 import cat.institutmarianao.sailing.validation.groups.OnTripCreateDate;
 import cat.institutmarianao.sailing.validation.groups.OnTripCreateDeparture;
+import jakarta.servlet.ServletException;
 import jakarta.validation.constraints.Positive;
 
 @Controller
@@ -35,6 +45,7 @@ import jakarta.validation.constraints.Positive;
 @RequestMapping(value = "/trips")
 public class TripController {
 
+	@Autowired
 	private TripService tripService;
 
 	@ModelAttribute("trip")
@@ -59,9 +70,12 @@ public class TripController {
 
 	@GetMapping("/book/{trip_type_id}")
 	public ModelAndView bookSelectDate(@PathVariable(name = "trip_type_id", required = true) Long tripTypeId) {
-		// TODO - Prepare a dialog to select a departure date for the booked trip with
-		// id tripTypeId
-		return null;
+		ModelAndView trips = new ModelAndView("book_places");
+		TripType trip = tripService.getTripTypeById(tripTypeId);
+
+		trips.addObject("trip", trip);
+
+		return trips;
 	}
 
 	@PostMapping("/book/book_departure")
@@ -95,23 +109,65 @@ public class TripController {
 	}
 
 	@GetMapping("/booked")
-	public ModelAndView booked() {
-		// TODO - Retrieve all booked trips
-		return null;
+	public ModelAndView booked() throws ServletException, IOException {
+	    ModelAndView trips = new ModelAndView("trips");
+
+	    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+	    String username = authentication != null ? authentication.getName() : null;
+
+	    String role = authentication != null && authentication.getAuthorities() != null
+	            ? authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).findFirst().orElse("")
+	            : "";
+	    System.out.println(role);
+
+	    List<Trip> tripList;
+
+	    if ("ROLE_ADMIN".equals(role)) {
+	        tripList = tripService.findAll();
+	    } else if ("ROLE_CLIENT".equals(role)) {
+	        tripList = tripService.findAllByClientUsername(username);
+	    } else {
+	        tripList = new ArrayList<>();
+	    }
+
+	    List<TripType> allTripTypes = tripService.getAllTripTypes();
+
+	    Map<Long, String> tripTypeTitle = new HashMap<>();
+	    Map<Long, String> categoryTitle = new HashMap<>();
+	    
+	    for (TripType tripType : allTripTypes) {
+	        tripTypeTitle.put(tripType.getId(), tripType.getTitle());
+	        categoryTitle.put(tripType.getId(), tripType.getCategory().name());
+	    }
+
+	    trips.addObject("trips", tripList);
+	    trips.addObject("tripTypeMap", tripTypeTitle);
+	    trips.addObject("tripTypeCategories", categoryTitle);
+	    trips.addObject("done", new Done());
+	    trips.addObject("rescheduling", new Rescheduling());
+	    trips.addObject("cancellation", new Cancellation());
+	    trips.addObject("role", role);
+
+	    return trips;
 	}
 
 	@PostMapping("/cancel")
-	public String cancelTrip(@Validated Cancellation cancellation) {
-
-		// TODO - Cancel a trip (add a CANCELLATION action to its tracking)
-		return null;
+	public String cancelTrip(@Validated Cancellation cancellation, Authentication authentication) {
+	    String username = authentication.getName();
+	    cancellation.setPerformer(username);
+	    tripService.track(cancellation);
+	    
+	    return "redirect:/trips/booked";
 	}
 
-	@PostMapping("/done")
-	public String doneTrip(@Validated(OnActionCreate.class) Done done) {
 
-		// TODO - Do a trip (add a DONE action to its tracking)
-		return null;
+	@PostMapping("/done")
+	public String doneTrip(@Validated(OnActionCreate.class) Done done, Authentication authentication) {
+		  String username = authentication.getName();
+		    done.setPerformer(username);
+		    tripService.track(done);
+		    
+		    return "redirect:/trips/booked";
 	}
 
 	@PostMapping("/reschedule")
@@ -123,8 +179,15 @@ public class TripController {
 
 	@GetMapping("/tracking/{id}")
 	public String showContentPart(@PathVariable(name = "id", required = true) @Positive Long id, ModelMap modelMap) {
-
-		// TODO - Retrieve the tracking for the trip id with id id
-		return null;
+		modelMap.addAttribute("tripId", id);
+		modelMap.addAttribute("tracking", tripService.findTrackingById(id));
+		return "fragments/dialogs :: tracking_dialog_body";
 	}
+
+	private void prepareBookDate(ModelMap modelMap, Trip trip) {
+		modelMap.addAttribute("trip", trip);
+		modelMap.addAttribute("tripType", tripService.getTripTypeById(trip.getTypeId()));
+		modelMap.addAttribute("action", "/trips/book/book_departure");
+	}
+
 }
