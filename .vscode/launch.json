@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-SailingApplication<sailing>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "cat.institutmarianao.sailing.SailingApplication",
+            "projectName": "sailing",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

@@ -142,7 +142,7 @@ public class TripController {
 
 	    trips.addObject("trips", tripList);
 	    trips.addObject("tripTypeMap", tripTypeTitle);
-	    trips.addObject("tripTypeCategories", categoryTitle);
+	    trips.addObject("tripTypeCategories", categoryTitle); 
 	    trips.addObject("done", new Done());
 	    trips.addObject("rescheduling", new Rescheduling());
 	    trips.addObject("cancellation", new Cancellation());

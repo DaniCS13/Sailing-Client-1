@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import cat.institutmarianao.sailing.model.Action;
 import cat.institutmarianao.sailing.model.BookedPlace;
+
 import cat.institutmarianao.sailing.model.Cancellation;
+
 import cat.institutmarianao.sailing.model.Done;
 import cat.institutmarianao.sailing.model.Rescheduling;
 import cat.institutmarianao.sailing.model.Trip;
