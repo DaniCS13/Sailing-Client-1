@@ -175,12 +175,16 @@ public class TripController {
 	}
 
 	@PostMapping("/reschedule")
-	public String saveAction(@Validated(OnActionCreate.class) Rescheduling rescheduling) {
-
-		// TODO - Reschedule a trip (add a RESCHEDULE action to its tracking)
-		return null;
+	public String saveAction(@Validated(OnActionCreate.class) Rescheduling rescheduling, Authentication authentication) {
+		rescheduling.setDate(new Date());
+		
+		String username = authentication.getName();
+		rescheduling.setPerformer(username);
+		tripService.track(rescheduling);
+		
+		
+		return "redirect:/trips/booked";
 	}
-
 	@GetMapping("/tracking/{id}")
 	public String showContentPart(@PathVariable(name = "id", required = true) @Positive Long id, ModelMap modelMap) {
 		modelMap.addAttribute("tripId", id);
