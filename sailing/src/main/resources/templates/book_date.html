@@ -39,15 +39,15 @@
 				<h4 class="fw-semibold" th:text="${tripType.title}">1 Hour Sailing
 					Tour</h4>
 				<p class="mb-1">
-					<strong th:text="${tripType.price}">30 €</strong> - <span
-						th:text="${tripType.duration}">1 hour</span>
+					<span th:text="${tripType.price}"></span>€ - <span
+						th:text="${tripType.duration}">1 hour</span> hour
 				</p>
 				<p class="text-muted" th:text="${tripType.description}">1h Sailing
 					Experience</p>
 			</div>
 
 			<!-- Trip Date Form -->
-			<form th:action="@{/trips/book/departure}" method="post"
+			<form th:action="@{/trips/book/book_departure}" method="post"
 				class="card p-3">
 
 				<div class="mb-3">

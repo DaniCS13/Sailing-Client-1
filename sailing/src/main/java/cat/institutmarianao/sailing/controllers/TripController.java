@@ -69,9 +69,9 @@ public class TripController {
 	@GetMapping("/book/{trip_type_id}")
 	public ModelAndView bookSelectDate(@PathVariable(name = "trip_type_id", required = true) Long tripTypeId) {
 		ModelAndView trips = new ModelAndView("book_date");
-		TripType trip = tripService.getTripTypeById(tripTypeId);
+		TripType tripType = tripService.getTripTypeById(tripTypeId);
 
-		trips.addObject("trip", trip);
+		trips.addObject("tripType", tripType);
 
 		return trips;
 	}
@@ -81,10 +81,17 @@ public class TripController {
 			BindingResult result, @SessionAttribute("tripType") TripType tripType,
 			@SessionAttribute("freePlaces") Map<Date, Long> freePlaces, ModelMap modelMap) {
 
+		if (result.hasErrors()) {
+			return "book_date";
+		}
 		// TODO - Prepare a dialog to select a departure time for the booked trip
 		// TODO - Leave all free places for the selected trip in the selected departure
 		// date in session (freePlaces attribute)
-		return null;
+		modelMap.addAttribute("trip", trip);
+		modelMap.addAttribute("tripType", tripType);
+		modelMap.addAttribute("freePlaces", freePlaces);
+
+		return "book_departure";
 	}
 
 	@PostMapping("/book/book_places")
