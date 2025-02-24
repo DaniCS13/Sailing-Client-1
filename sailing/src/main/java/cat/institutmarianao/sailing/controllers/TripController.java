@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -26,7 +25,6 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.ModelAndView;
 
-import cat.institutmarianao.sailing.model.Action;
 import cat.institutmarianao.sailing.model.Cancellation;
 import cat.institutmarianao.sailing.model.Done;
 import cat.institutmarianao.sailing.model.Rescheduling;
@@ -70,7 +68,7 @@ public class TripController {
 
 	@GetMapping("/book/{trip_type_id}")
 	public ModelAndView bookSelectDate(@PathVariable(name = "trip_type_id", required = true) Long tripTypeId) {
-		ModelAndView trips = new ModelAndView("book_places");
+		ModelAndView trips = new ModelAndView("book_date");
 		TripType trip = tripService.getTripTypeById(tripTypeId);
 
 		trips.addObject("trip", trip);
@@ -110,64 +108,63 @@ public class TripController {
 
 	@GetMapping("/booked")
 	public ModelAndView booked() throws ServletException, IOException {
-	    ModelAndView trips = new ModelAndView("trips");
+		ModelAndView trips = new ModelAndView("trips");
 
-	    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-	    String username = authentication != null ? authentication.getName() : null;
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String username = authentication != null ? authentication.getName() : null;
 
-	    String role = authentication != null && authentication.getAuthorities() != null
-	            ? authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).findFirst().orElse("")
-	            : "";
-	    System.out.println(role);
+		String role = authentication != null && authentication.getAuthorities() != null
+				? authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).findFirst().orElse("")
+				: "";
+		System.out.println(role);
 
-	    List<Trip> tripList;
+		List<Trip> tripList;
 
-	    if ("ROLE_ADMIN".equals(role)) {
-	        tripList = tripService.findAll();
-	    } else if ("ROLE_CLIENT".equals(role)) {
-	        tripList = tripService.findAllByClientUsername(username);
-	    } else {
-	        tripList = new ArrayList<>();
-	    }
+		if ("ROLE_ADMIN".equals(role)) {
+			tripList = tripService.findAll();
+		} else if ("ROLE_CLIENT".equals(role)) {
+			tripList = tripService.findAllByClientUsername(username);
+		} else {
+			tripList = new ArrayList<>();
+		}
 
-	    List<TripType> allTripTypes = tripService.getAllTripTypes();
+		List<TripType> allTripTypes = tripService.getAllTripTypes();
 
-	    Map<Long, String> tripTypeTitle = new HashMap<>();
-	    Map<Long, String> categoryTitle = new HashMap<>();
-	    
-	    for (TripType tripType : allTripTypes) {
-	        tripTypeTitle.put(tripType.getId(), tripType.getTitle());
-	        categoryTitle.put(tripType.getId(), tripType.getCategory().name());
-	    }
+		Map<Long, String> tripTypeTitle = new HashMap<>();
+		Map<Long, String> categoryTitle = new HashMap<>();
 
-	    trips.addObject("trips", tripList);
-	    trips.addObject("tripTypeMap", tripTypeTitle);
-	    trips.addObject("tripTypeCategories", categoryTitle); 
-	    trips.addObject("done", new Done());
-	    trips.addObject("rescheduling", new Rescheduling());
-	    trips.addObject("cancellation", new Cancellation());
-	    trips.addObject("role", role);
+		for (TripType tripType : allTripTypes) {
+			tripTypeTitle.put(tripType.getId(), tripType.getTitle());
+			categoryTitle.put(tripType.getId(), tripType.getCategory().name());
+		}
 
-	    return trips;
+		trips.addObject("trips", tripList);
+		trips.addObject("tripTypeMap", tripTypeTitle);
+		trips.addObject("tripTypeCategories", categoryTitle);
+		trips.addObject("done", new Done());
+		trips.addObject("rescheduling", new Rescheduling());
+		trips.addObject("cancellation", new Cancellation());
+		trips.addObject("role", role);
+
+		return trips;
 	}
 
 	@PostMapping("/cancel")
 	public String cancelTrip(@Validated Cancellation cancellation, Authentication authentication) {
-	    String username = authentication.getName();
-	    cancellation.setPerformer(username);
-	    tripService.track(cancellation);
-	    
-	    return "redirect:/trips/booked";
-	}
+		String username = authentication.getName();
+		cancellation.setPerformer(username);
+		tripService.track(cancellation);
 
+		return "redirect:/trips/booked";
+	}
 
 	@PostMapping("/done")
 	public String doneTrip(@Validated(OnActionCreate.class) Done done, Authentication authentication) {
-		  String username = authentication.getName();
-		    done.setPerformer(username);
-		    tripService.track(done);
-		    
-		    return "redirect:/trips/booked";
+		String username = authentication.getName();
+		done.setPerformer(username);
+		tripService.track(done);
+
+		return "redirect:/trips/booked";
 	}
 
 	@PostMapping("/reschedule")

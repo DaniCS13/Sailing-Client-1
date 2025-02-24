@@ -18,7 +18,7 @@
 	href="../static/css/main.css" />
 <title>New user</title>
 </head>
-<body  >
+<body>
 	<script th:src="@{/js/user.js}" src="../static/js/user.js"></script>
 
 	<section class="container">
@@ -31,8 +31,39 @@
 		<section
 			th:replace="~{fragments/template :: heading(#{book.heading})}"
 			class="card my-1">Booking</section>
-			
-			<!-- /* TODO - Build a form to get the departure date of the trip (DON'T FORGET TO INCLUDE CSRF FIELD!! */ -->
+
+		<!-- /* TODO - Build a form to get the departure date of the trip (DON'T FORGET TO INCLUDE CSRF FIELD!! */ -->
+		<section class="container my-4">
+			<!-- Tour Info -->
+			<div class="mb-3">
+				<h4 class="fw-semibold" th:text="${tripType.title}">1 Hour Sailing
+					Tour</h4>
+				<p class="mb-1">
+					<strong th:text="${tripType.price}">30 €</strong> - <span
+						th:text="${tripType.duration}">1 hour</span>
+				</p>
+				<p class="text-muted" th:text="${tripType.description}">1h Sailing
+					Experience</p>
+			</div>
+
+			<!-- Trip Date Form -->
+			<form th:action="@{/trips/book/departure}" method="post"
+				class="card p-3">
+
+				<div class="mb-3">
+					<h5 class="fw-semibold" th:text="#{book.tripDate}">Trip date</h5>
+					<div class="d-flex align-items-center">
+						<label for="departureDate" class="me-2"
+							th:text="#{book.selectTripDate}">Select trip date:</label> <input
+							type="date" class="form-control w-auto" id="departureDate"
+							name="departureDate" required />
+					</div>
+				</div>
+
+				<button type="submit" class="btn btn-success" th:text="#{book.next}">Next</button>
+			</form>
+		</section>
+
 
 	</section>
 
