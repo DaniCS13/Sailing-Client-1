@@ -185,6 +185,7 @@ public class TripController {
 		
 		return "redirect:/trips/booked";
 	}
+
 	@GetMapping("/tracking/{id}")
 	public String showContentPart(@PathVariable(name = "id", required = true) @Positive Long id, ModelMap modelMap) {
 		modelMap.addAttribute("tripId", id);
