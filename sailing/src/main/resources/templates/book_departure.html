@@ -1,40 +1,66 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="https://wwww.thymeleaf.org"
-	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="en" xmlns:th="https://wwww.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head th:replace="~{fragments/template :: head}">
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 
-<link
-	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
-	rel="stylesheet">
-<link rel="stylesheet"
-	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-<script
-	src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
 
-<link rel="stylesheet" th:href="@{/css/main.css}"
-	href="../static/css/main.css" />
-<title>New user</title>
+	<link rel="stylesheet" th:href="@{/css/main.css}" href="../static/css/main.css" />
+	<title>New user</title>
 </head>
-<body >
+
+<body>
 	<script th:src="@{/js/user.js}" src="../static/js/user.js"></script>
 
 	<section class="container">
 		<header class="jumbotron" th:replace="~{fragments/template :: header}">
 			Book Date Header </header>
 
-		<nav class="navbar navbar-default"
-			th:replace="~{fragments/template :: navbar}">Navbar</nav>
+		<nav class="navbar navbar-default" th:replace="~{fragments/template :: navbar}">Navbar</nav>
 
-		<section
-			th:replace="~{fragments/template :: heading(#{book.heading})}"
-			class="card my-1">Booking</section>
+		<section th:replace="~{fragments/template :: heading(#{book.heading})}" class="card my-1">Booking</section>
 
-			<!-- /* TODO - Build a form to get the departure time of the trip (DON'T FORGET TO INCLUDE CSRF FIELD!! */ -->
+		<!-- /* TODO - Build a form to get the departure time of the trip (DON'T FORGET TO INCLUDE CSRF FIELD!! */ -->
+		<!-- Tour Info -->
+		<div class="mb-3">
+			<h4 class="fw-semibold" th:text="${tripType.title}">1 Hour Sailing Tour</h4>
+			<p class="mb-1">
+				<span th:text="${tripType.price}"></span>€ - <span th:text="${tripType.duration}">1 hour</span> hour
+			</p>
+			<p class="text-muted" th:text="${tripType.description}">1h Sailing Experience</p>
+		</div>
 
+		<!-- Selected Trip Date -->
+		<div class="mb-3">
+			<h5 class="fw-semibold" th:text="#{book.date}">Selected Trip Date</h5>
+			<p th:text="${#dates.format(trip.date, 'dd-MM-yyyy')}">2025-02-25</p>
+		</div>
+
+		<!-- Departure Time Form -->
+		<section class="container my-4">
+			<form th:action="@{/trips/book/book_places}" method="post" class="card p-3">
+				<div class="mb-3">
+					<h5 class="fw-semibold" th:text="#{book.departure.time}">Departure Time</h5>
+					<ul class="list-group">
+						<li class="list-group-item" th:each="departure : ${tripType.departures}">
+							<label>
+								<input type="radio" th:name="departure" th:value="${#dates.format(departure, 'HH:mm')}"
+									required>
+								<span th:text="${#dates.format(departure, 'HH:mm')}">9:00</span>
+							</label>
+						</li>
+					</ul>
+				</div>
+
+				<button type="submit" class="btn btn-success" th:text="#{book.next}">Next</button>
+			</form>
+		</section>
 	</section>
 
 </body>
+
 </html>

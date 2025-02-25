@@ -82,6 +82,9 @@ public class TripController {
 			@SessionAttribute("freePlaces") Map<Date, Long> freePlaces, ModelMap modelMap) {
 
 		if (result.hasErrors()) {
+			modelMap.addAttribute("trip", trip);
+			modelMap.addAttribute("tripType", tripType);
+			modelMap.addAttribute("freePlaces", freePlaces);
 			return "book_date";
 		}
 		// TODO - Prepare a dialog to select a departure time for the booked trip
@@ -100,8 +103,28 @@ public class TripController {
 			@SessionAttribute("freePlaces") Map<Date, Long> freePlaces,
 			@SessionAttribute("tripFreePlaces") Long tripFreePlaces, ModelMap modelMap) {
 
+		System.out.println("Received trip: " + trip);
+		System.out.println("Received tripType: " + tripType);
+		System.out.println("Received freePlaces: " + freePlaces);
+		System.out.println("Received tripFreePlaces: " + tripFreePlaces);
+		System.out.println("BindingResult has errors: " + result.hasErrors());
+
+		if (result.hasErrors()) {
+			result.getAllErrors().forEach(error -> System.out.println(error.toString()));
+			modelMap.addAttribute("trip", trip);
+			modelMap.addAttribute("tripType", tripType);
+			modelMap.addAttribute("freePlaces", freePlaces);
+			modelMap.addAttribute("tripFreePlaces", tripFreePlaces);
+			return "book_departure";
+		}
+
 		// TODO - Prepare a dialog to select places for the booked trip
-		return null;
+		modelMap.addAttribute("trip", trip);
+		modelMap.addAttribute("tripType", tripType);
+		modelMap.addAttribute("freePlaces", freePlaces);
+		modelMap.addAttribute("tripFreePlaces", tripFreePlaces);
+
+		return "book_places";
 	}
 
 	@PostMapping("/book/book_save")
@@ -175,14 +198,14 @@ public class TripController {
 	}
 
 	@PostMapping("/reschedule")
-	public String saveAction(@Validated(OnActionCreate.class) Rescheduling rescheduling, Authentication authentication) {
+	public String saveAction(@Validated(OnActionCreate.class) Rescheduling rescheduling,
+			Authentication authentication) {
 		rescheduling.setDate(new Date());
-		
+
 		String username = authentication.getName();
 		rescheduling.setPerformer(username);
 		tripService.track(rescheduling);
-		
-		
+
 		return "redirect:/trips/booked";
 	}
 
