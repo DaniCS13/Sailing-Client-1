@@ -84,7 +84,10 @@
 					<td th:text="${tripTypeCategories[trip.typeId]}"></td>
 
 					<td th:text="${trip.status}"
-						th:class="${trip.status}"
+						th:class="${#strings.equals(trip.status, 'DONE') ? 'text-success' :
+               #strings.equals(trip.status, 'RESERVED') ? 'text-primary' :
+               #strings.equals(trip.status, 'CANCELLED') ? 'text-danger' :
+               #strings.equals(trip.status, 'RESCHEDULED') ? 'text-warning' : ''}"
 						style="cursor: pointer; text-decoration: underline;"
 						th:attr="data-bs-tripid=${trip.id}"
 						onclick="loadTracking(this.getAttribute('data-bs-tripid'))">

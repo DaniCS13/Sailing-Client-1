@@ -88,9 +88,7 @@ public class TripController {
 			modelMap.addAttribute("freePlaces", freePlaces);
 			return "book_date";
 		}
-		// TODO - Prepare a dialog to select a departure time for the booked trip
-		// TODO - Leave all free places for the selected trip in the selected departure
-		// date in session (freePlaces attribute)
+
 		modelMap.addAttribute("trip", trip);
 		modelMap.addAttribute("tripType", tripType);
 		modelMap.addAttribute("freePlaces", freePlaces);
@@ -115,7 +113,6 @@ public class TripController {
 
 		List<BookedPlace> bookedPlaces = tripService.findBookedPlacesByTripIdAndDate(tripType.getId(), trip.getDate());
 
-		// Calcular plazas libres
 		long bookedSeats = bookedPlaces.isEmpty() ? 0 : bookedPlaces.get(0).getBookedPlaces();
 		long availablePlaces = tripType.getMaxPlaces() - bookedSeats;
 
@@ -133,18 +130,11 @@ public class TripController {
 			@SessionAttribute("tripFreePlaces") Long tripFreePlaces, ModelMap modelMap, SessionStatus sessionStatus,
 			Authentication authentication) {
 
-		System.out.println("Received trip: " + trip);
-		System.out.println("Received tripType: " + tripType);
-		System.out.println("Received freePlaces: " + freePlaces);
-		System.out.println("Received tripFreePlaces: " + tripFreePlaces);
-		System.out.println("BindingResult has errors: " + result.hasErrors());
-
 		if (authentication != null) {
 			String username = authentication.getName();
-			trip.setClientUsername(username); // Soluciona el error del campo vacío
+			trip.setClientUsername(username);
 		}
 
-		// Asignar el id del tripType al trip si está disponible
 		if (tripType != null && tripType.getId() != null) {
 			trip.setTypeId(tripType.getId());
 		}
@@ -160,17 +150,6 @@ public class TripController {
 			return "book_places";
 		}
 
-		// Check if the number of places requested is greater than the maximum allowed
-		if (trip.getPlaces() > tripType.getMaxPlaces()) {
-			modelMap.addAttribute("error", "Number of places cannot exceed " + tripType.getMaxPlaces());
-			modelMap.addAttribute("trip", trip);
-			modelMap.addAttribute("tripType", tripType);
-			modelMap.addAttribute("freePlaces", freePlaces);
-			modelMap.addAttribute("tripFreePlaces", tripFreePlaces);
-			return "book_places";
-		}
-
-		// Save the trip
 		tripService.save(trip);
 		sessionStatus.setComplete();
 
@@ -255,12 +234,6 @@ public class TripController {
 		modelMap.addAttribute("tripId", id);
 		modelMap.addAttribute("tracking", tripService.findTrackingById(id));
 		return "fragments/dialogs :: tracking_dialog_body";
-	}
-
-	private void prepareBookDate(ModelMap modelMap, Trip trip) {
-		modelMap.addAttribute("trip", trip);
-		modelMap.addAttribute("tripType", tripService.getTripTypeById(trip.getTypeId()));
-		modelMap.addAttribute("action", "/trips/book/book_departure");
 	}
 
 }

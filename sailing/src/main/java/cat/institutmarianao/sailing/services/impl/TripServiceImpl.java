@@ -133,8 +133,8 @@ public class TripServiceImpl implements TripService {
 		Map<String, Long> uriVariable = new HashMap<>();
 		uriVariable.put("id", id);
 
-		ResponseEntity<Action> response = restTemplate
-				.getForEntity(uriTemplate.buildAndExpand(uriVariable).toUriString(), Action.class);
+		ResponseEntity<Action[]> response = restTemplate
+				.getForEntity(uriTemplate.buildAndExpand(uriVariable).toUriString(), Action[].class);
 		return Arrays.asList(response.getBody());
 	}
 
