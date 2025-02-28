@@ -1,5 +1,6 @@
 package cat.institutmarianao.sailing.services.impl;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -19,8 +20,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import cat.institutmarianao.sailing.model.Action;
 import cat.institutmarianao.sailing.model.BookedPlace;
-import cat.institutmarianao.sailing.model.Done;
-import cat.institutmarianao.sailing.model.Rescheduling;
 import cat.institutmarianao.sailing.model.Trip;
 import cat.institutmarianao.sailing.model.TripType;
 import cat.institutmarianao.sailing.services.TripService;
@@ -32,7 +31,7 @@ public class TripServiceImpl implements TripService {
 	private static final String TRIPS_SERVICE = "/trips";
 	private static final String TRIPS_FIND_ALL = TRIPS_SERVICE + "/find/all";
 	private static final String TRIPS_FIND_BY_USERNAME = TRIPS_FIND_ALL + "/by/client/username/";
-	private static final String TRIPS_BOOKED_PLACES = TRIPS_FIND_ALL + "/bookedPlaces/";
+	private static final String TRIPS_BOOKED_PLACES = TRIPS_SERVICE + "/bookedPlaces/";
 	private static final String TRIP_TYPES_ALL = "/triptypes";
 	private static final String TRIP_TYPES_FIND_ALL = TRIP_TYPES_ALL + "/find/all";
 	private static final String TRIP_TYPES_GROUP = TRIP_TYPES_ALL + "/find/all/group";
@@ -79,7 +78,9 @@ public class TripServiceImpl implements TripService {
 	 */
 	@Override
 	public List<BookedPlace> findBookedPlacesByTripIdAndDate(Long id, Date date) {
-		final String uri = webServiceHost + ":" + webServicePort + TRIPS_BOOKED_PLACES + id + "/" + date;
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		String formattedDate = dateFormat.format(date);
+		final String uri = webServiceHost + ":" + webServicePort + TRIPS_BOOKED_PLACES + id + "/" + formattedDate;
 		ResponseEntity<BookedPlace[]> response = restTemplate.getForEntity(uri, BookedPlace[].class);
 		return Arrays.asList(response.getBody());
 	}
@@ -126,25 +127,26 @@ public class TripServiceImpl implements TripService {
 
 	@Override
 	public List<Action> findTrackingById(Long id) {
-		final String uri = webServiceHost + ":" + webServicePort + "/tracking/" + id;
-		
+		final String uri = webServiceHost + ":" + webServicePort + TRIPS_SERVICE + "/find/tracking/by/id/" + id;
+
 		UriComponentsBuilder uriTemplate = UriComponentsBuilder.fromHttpUrl(uri);
 		Map<String, Long> uriVariable = new HashMap<>();
 		uriVariable.put("id", id);
-		
-		ResponseEntity<Action> response = restTemplate.getForEntity(uriTemplate.buildAndExpand(uriVariable).toUriString(), Action.class);
+
+		ResponseEntity<Action> response = restTemplate
+				.getForEntity(uriTemplate.buildAndExpand(uriVariable).toUriString(), Action.class);
 		return Arrays.asList(response.getBody());
 	}
 
 	@Override
 	public Action track(Action action) {
 		final String uri = webServiceHost + ":" + webServicePort + "/trips/save/action";
-		
+
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
-		
+
 		HttpEntity<Action> request = new HttpEntity<>(action, headers);
-		
+
 		return restTemplate.postForObject(uri, action, Action.class);
 	}
 

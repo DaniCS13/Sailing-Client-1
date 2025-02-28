@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.ModelAndView;
 
+import cat.institutmarianao.sailing.model.BookedPlace;
 import cat.institutmarianao.sailing.model.Cancellation;
 import cat.institutmarianao.sailing.model.Done;
 import cat.institutmarianao.sailing.model.Rescheduling;
@@ -99,30 +100,29 @@ public class TripController {
 
 	@PostMapping("/book/book_places")
 	public String bookSelectPlaces(@Validated(OnTripCreateDeparture.class) @ModelAttribute("trip") Trip trip,
-			BindingResult result, @SessionAttribute("tripType") TripType tripType,
-			@SessionAttribute("freePlaces") Map<Date, Long> freePlaces,
-			@SessionAttribute("tripFreePlaces") Long tripFreePlaces, ModelMap modelMap) {
-
-		System.out.println("Received trip: " + trip);
-		System.out.println("Received tripType: " + tripType);
-		System.out.println("Received freePlaces: " + freePlaces);
-		System.out.println("Received tripFreePlaces: " + tripFreePlaces);
-		System.out.println("BindingResult has errors: " + result.hasErrors());
+			BindingResult result, ModelMap modelMap) {
 
 		if (result.hasErrors()) {
 			result.getAllErrors().forEach(error -> System.out.println(error.toString()));
 			modelMap.addAttribute("trip", trip);
-			modelMap.addAttribute("tripType", tripType);
-			modelMap.addAttribute("freePlaces", freePlaces);
-			modelMap.addAttribute("tripFreePlaces", tripFreePlaces);
 			return "book_departure";
 		}
 
-		// TODO - Prepare a dialog to select places for the booked trip
+		TripType tripType = (TripType) modelMap.getAttribute("tripType");
+		if (tripType == null) {
+			throw new IllegalStateException("TripType no encontrado en la sesión");
+		}
+
+		List<BookedPlace> bookedPlaces = tripService.findBookedPlacesByTripIdAndDate(tripType.getId(), trip.getDate());
+
+		// Calcular plazas libres
+		long bookedSeats = bookedPlaces.isEmpty() ? 0 : bookedPlaces.get(0).getBookedPlaces();
+		long availablePlaces = tripType.getMaxPlaces() - bookedSeats;
+
+		modelMap.addAttribute("bookedPlaces", bookedPlaces);
 		modelMap.addAttribute("trip", trip);
 		modelMap.addAttribute("tripType", tripType);
-		modelMap.addAttribute("freePlaces", freePlaces);
-		modelMap.addAttribute("tripFreePlaces", tripFreePlaces);
+		modelMap.addAttribute("tripFreePlaces", availablePlaces);
 
 		return "book_places";
 	}
@@ -130,10 +130,51 @@ public class TripController {
 	@PostMapping("/book/book_save")
 	public String bookSave(@Validated(OnTripCreate.class) @ModelAttribute("trip") Trip trip, BindingResult result,
 			@SessionAttribute("tripType") TripType tripType, @SessionAttribute("freePlaces") Map<Date, Long> freePlaces,
-			@SessionAttribute("tripFreePlaces") Long tripFreePlaces, ModelMap modelMap, SessionStatus sessionStatus) {
+			@SessionAttribute("tripFreePlaces") Long tripFreePlaces, ModelMap modelMap, SessionStatus sessionStatus,
+			Authentication authentication) {
 
-		// TODO - Saves a booking
-		return null;
+		System.out.println("Received trip: " + trip);
+		System.out.println("Received tripType: " + tripType);
+		System.out.println("Received freePlaces: " + freePlaces);
+		System.out.println("Received tripFreePlaces: " + tripFreePlaces);
+		System.out.println("BindingResult has errors: " + result.hasErrors());
+
+		if (authentication != null) {
+			String username = authentication.getName();
+			trip.setClientUsername(username); // Soluciona el error del campo vacío
+		}
+
+		// Asignar el id del tripType al trip si está disponible
+		if (tripType != null && tripType.getId() != null) {
+			trip.setTypeId(tripType.getId());
+		}
+
+		System.out.println("Received trip2: " + trip);
+
+		if (result.hasErrors()) {
+			result.getAllErrors().forEach(error -> System.out.println(error.toString()));
+			modelMap.addAttribute("trip", trip);
+			modelMap.addAttribute("tripType", tripType);
+			modelMap.addAttribute("freePlaces", freePlaces);
+			modelMap.addAttribute("tripFreePlaces", tripFreePlaces);
+			return "book_places";
+		}
+
+		// Check if the number of places requested is greater than the maximum allowed
+		if (trip.getPlaces() > tripType.getMaxPlaces()) {
+			modelMap.addAttribute("error", "Number of places cannot exceed " + tripType.getMaxPlaces());
+			modelMap.addAttribute("trip", trip);
+			modelMap.addAttribute("tripType", tripType);
+			modelMap.addAttribute("freePlaces", freePlaces);
+			modelMap.addAttribute("tripFreePlaces", tripFreePlaces);
+			return "book_places";
+		}
+
+		// Save the trip
+		tripService.save(trip);
+		sessionStatus.setComplete();
+
+		return "redirect:/trips/booked";
 	}
 
 	@GetMapping("/booked")

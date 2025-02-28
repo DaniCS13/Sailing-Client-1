@@ -52,7 +52,8 @@
 					<div class="d-flex align-items-center">
 						<label for="places" class="me-2">Number of places:</label>
 						<input type="number" class="form-control w-auto" id="places" name="places" min="1"
-							max="${tripType.maxPlaces}" required />
+							th:attr="max=${tripFreePlaces}" required />
+							<p class="ms-2 mb-0 text-muted" th:text="#{book.free.places(${tripFreePlaces})}"></p>
 					</div>
 				</div>
 
